@@ -20,16 +20,32 @@ default:
       - .npm/
   before_script:
     - |
+      if ! command -v bun >/dev/null 2>&1 && ! command -v npm >/dev/null 2>&1; then
+        if command -v curl >/dev/null 2>&1; then
+          curl -fsSL https://bun.sh/install | bash
+        elif command -v wget >/dev/null 2>&1; then
+          wget -qO- https://bun.sh/install | bash
+        else
+          echo "Neither bun/npm is available and curl/wget is missing; cannot bootstrap runtime." >&2
+          exit 1
+        fi
+        export BUN_INSTALL="${BUN_INSTALL:-$HOME/.bun}"
+        export PATH="$BUN_INSTALL/bin:$PATH"
+      fi
+
       if command -v bun >/dev/null 2>&1; then
         test -f bun.lock
         bun install --frozen-lockfile --cache-dir .bun-cache
-      else
+      elif command -v npm >/dev/null 2>&1; then
         npm config set cache .npm --global
         if [ -f package-lock.json ]; then
           npm ci --no-audit --no-fund
         else
           npm install --no-audit --no-fund
         fi
+      else
+        echo "No usable package manager found after bootstrap attempt." >&2
+        exit 1
       fi
 
 typecheck:
@@ -39,7 +55,7 @@ typecheck:
       if command -v bun >/dev/null 2>&1; then
         bunx tsc --noEmit
       else
-        npx tsc --noEmit
+        npm exec -- tsc --noEmit
       fi
 
 build:
