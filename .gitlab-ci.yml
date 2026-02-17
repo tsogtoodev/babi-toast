@@ -15,15 +15,15 @@ default:
   tags:
     - docker-image-build-runner
   cache:
-    key: yarn-${CI_COMMIT_REF_SLUG}
+    key: npm-${CI_COMMIT_REF_SLUG}
     paths:
       - node_modules/
-      - .yarn-cache/
+      - .npm/
 
 build:
   stage: verify
   script:
-    - yarn build
+    - npm run build
   artifacts:
     when: on_success
     expire_in: 1 week
