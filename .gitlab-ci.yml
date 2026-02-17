@@ -19,7 +19,8 @@ default:
       - .npm/
   before_script:
     - command -v npm >/dev/null 2>&1 || (echo "npm is required. Install Node.js >=22 on this runner." >&2; exit 1)
-    - node -e "const major=+process.versions.node.split('.')[0]; if(major<22){console.error('Node.js >=22 is required. Current: '+process.versions.node); process.exit(1)}"
+    - |
+      node -e 'const major=+process.versions.node.split(".")[0]; if(major<22){console.error("Node.js >=22 is required. Current: "+process.versions.node); process.exit(1)}'
     - test -f package-lock.json || (echo "package-lock.json is required. Run npm install and commit lockfile." >&2; exit 1)
     - npm config set cache .npm --global
     - npm ci --no-audit --no-fund
