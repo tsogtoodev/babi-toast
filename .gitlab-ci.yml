@@ -12,6 +12,8 @@ workflow:
 
 default:
   interruptible: true
+  tags:
+    - docker-runner
   cache:
     key: npm-${CI_COMMIT_REF_SLUG}
     paths:
