@@ -1,4 +1,4 @@
-image: oven/bun:1.2-alpine
+image: node:20-alpine
 
 stages:
   - verify
@@ -13,23 +13,45 @@ workflow:
 default:
   interruptible: true
   cache:
-    key: bun-${CI_COMMIT_REF_SLUG}
+    key: deps-${CI_COMMIT_REF_SLUG}
     paths:
+      - node_modules/
       - .bun-cache/
+      - .npm/
   before_script:
-    - test -f bun.lock
-    - bun install --frozen-lockfile --cache-dir .bun-cache
+    - |
+      if command -v bun >/dev/null 2>&1; then
+        test -f bun.lock
+        bun install --frozen-lockfile --cache-dir .bun-cache
+      else
+        npm config set cache .npm --global
+        if [ -f package-lock.json ]; then
+          npm ci --no-audit --no-fund
+        else
+          npm install --no-audit --no-fund
+        fi
+      fi
 
 typecheck:
   stage: verify
   script:
-    - bunx tsc --noEmit
+    - |
+      if command -v bun >/dev/null 2>&1; then
+        bunx tsc --noEmit
+      else
+        npx tsc --noEmit
+      fi
 
 build:
   stage: verify
   needs: ["typecheck"]
   script:
-    - bun run build
+    - |
+      if command -v bun >/dev/null 2>&1; then
+        bun run build
+      else
+        npm run build
+      fi
   artifacts:
     when: on_success
     expire_in: 1 week
@@ -44,7 +66,12 @@ release_package:
       when: manual
     - when: never
   script:
-    - bun run build
+    - |
+      if command -v bun >/dev/null 2>&1; then
+        bun run build
+      else
+        npm run build
+      fi
     - npm pack
   artifacts:
     when: on_success
