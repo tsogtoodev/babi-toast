@@ -1,4 +1,4 @@
-image: node:20-alpine
+image: node:24-alpine
 
 stages:
   - verify
@@ -13,84 +13,27 @@ workflow:
 default:
   interruptible: true
   cache:
-    key: deps-${CI_COMMIT_REF_SLUG}
+    key: npm-${CI_COMMIT_REF_SLUG}
     paths:
       - node_modules/
-      - .bun-cache/
       - .npm/
   before_script:
-    - |
-      if ! command -v bun >/dev/null 2>&1 && ! command -v npm >/dev/null 2>&1; then
-        export BUN_INSTALL="${BUN_INSTALL:-$HOME/.bun}"
-        export PATH="$BUN_INSTALL/bin:$PATH"
-        mkdir -p "$BUN_INSTALL/bin"
-        tmp_dir="${CI_PROJECT_DIR:-$PWD}/.bun-bootstrap"
-        mkdir -p "$tmp_dir"
-        bun_zip="$tmp_dir/bun.zip"
-        bun_url="https://github.com/oven-sh/bun/releases/latest/download/bun-linux-x64.zip"
-
-        if command -v curl >/dev/null 2>&1; then
-          curl -fsSL "$bun_url" -o "$bun_zip"
-        elif command -v wget >/dev/null 2>&1; then
-          wget -qO "$bun_zip" "$bun_url"
-        else
-          echo "Neither bun/npm is available and curl/wget is missing; cannot bootstrap runtime." >&2
-          exit 1
-        fi
-
-        if command -v unzip >/dev/null 2>&1; then
-          unzip -oq "$bun_zip" -d "$tmp_dir"
-        elif command -v python3 >/dev/null 2>&1; then
-          python3 -c 'import sys, zipfile; zipfile.ZipFile(sys.argv[1]).extractall(sys.argv[2])' "$bun_zip" "$tmp_dir"
-        else
-          echo "Bun bootstrap needs either unzip or python3 on this runner." >&2
-          exit 1
-        fi
-
-        bun_bin="$(find "$tmp_dir" -type f -name bun | head -n 1)"
-        if [ -z "$bun_bin" ]; then
-          echo "Bun bootstrap failed: bun binary not found after extraction." >&2
-          exit 1
-        fi
-
-        install -m 755 "$bun_bin" "$BUN_INSTALL/bin/bun"
-      fi
-
-      if command -v bun >/dev/null 2>&1; then
-        test -f bun.lock
-        bun install --frozen-lockfile --cache-dir .bun-cache
-      elif command -v npm >/dev/null 2>&1; then
-        npm config set cache .npm --global
-        if [ -f package-lock.json ]; then
-          npm ci --no-audit --no-fund
-        else
-          npm install --no-audit --no-fund
-        fi
-      else
-        echo "No usable package manager found after bootstrap attempt." >&2
-        exit 1
-      fi
+    - command -v npm >/dev/null 2>&1 || (echo "npm is required. Install Node.js >=22 on this runner." >&2; exit 1)
+    - node -e "const major=+process.versions.node.split('.')[0]; if(major<22){console.error('Node.js >=22 is required. Current: '+process.versions.node); process.exit(1)}"
+    - test -f package-lock.json || (echo "package-lock.json is required. Run npm install and commit lockfile." >&2; exit 1)
+    - npm config set cache .npm --global
+    - npm ci --no-audit --no-fund
 
 typecheck:
   stage: verify
   script:
-    - |
-      if command -v bun >/dev/null 2>&1; then
-        bunx tsc --noEmit
-      else
-        npm exec -- tsc --noEmit
-      fi
+    - npm run typecheck
 
 build:
   stage: verify
   needs: ["typecheck"]
   script:
-    - |
-      if command -v bun >/dev/null 2>&1; then
-        bun run build
-      else
-        npm run build
-      fi
+    - npm run build
   artifacts:
     when: on_success
     expire_in: 1 week
@@ -105,21 +48,8 @@ release_package:
       when: manual
     - when: never
   script:
-    - |
-      if command -v bun >/dev/null 2>&1; then
-        bun run build
-      else
-        npm run build
-      fi
-    - |
-      if command -v npm >/dev/null 2>&1; then
-        npm pack
-      elif command -v bun >/dev/null 2>&1; then
-        bun pm pack
-      else
-        echo "No pack tool available (npm/bun)." >&2
-        exit 1
-      fi
+    - npm run build
+    - npm pack
   artifacts:
     when: on_success
     expire_in: 1 week
