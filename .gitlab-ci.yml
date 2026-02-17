@@ -21,16 +21,39 @@ default:
   before_script:
     - |
       if ! command -v bun >/dev/null 2>&1 && ! command -v npm >/dev/null 2>&1; then
+        export BUN_INSTALL="${BUN_INSTALL:-$HOME/.bun}"
+        export PATH="$BUN_INSTALL/bin:$PATH"
+        mkdir -p "$BUN_INSTALL/bin"
+        tmp_dir="${CI_PROJECT_DIR:-$PWD}/.bun-bootstrap"
+        mkdir -p "$tmp_dir"
+        bun_zip="$tmp_dir/bun.zip"
+        bun_url="https://github.com/oven-sh/bun/releases/latest/download/bun-linux-x64.zip"
+
         if command -v curl >/dev/null 2>&1; then
-          curl -fsSL https://bun.sh/install | bash
+          curl -fsSL "$bun_url" -o "$bun_zip"
         elif command -v wget >/dev/null 2>&1; then
-          wget -qO- https://bun.sh/install | bash
+          wget -qO "$bun_zip" "$bun_url"
         else
           echo "Neither bun/npm is available and curl/wget is missing; cannot bootstrap runtime." >&2
           exit 1
         fi
-        export BUN_INSTALL="${BUN_INSTALL:-$HOME/.bun}"
-        export PATH="$BUN_INSTALL/bin:$PATH"
+
+        if command -v unzip >/dev/null 2>&1; then
+          unzip -oq "$bun_zip" -d "$tmp_dir"
+        elif command -v python3 >/dev/null 2>&1; then
+          python3 -c 'import sys, zipfile; zipfile.ZipFile(sys.argv[1]).extractall(sys.argv[2])' "$bun_zip" "$tmp_dir"
+        else
+          echo "Bun bootstrap needs either unzip or python3 on this runner." >&2
+          exit 1
+        fi
+
+        bun_bin="$(find "$tmp_dir" -type f -name bun | head -n 1)"
+        if [ -z "$bun_bin" ]; then
+          echo "Bun bootstrap failed: bun binary not found after extraction." >&2
+          exit 1
+        fi
+
+        install -m 755 "$bun_bin" "$BUN_INSTALL/bin/bun"
       fi
 
       if command -v bun >/dev/null 2>&1; then
@@ -88,7 +111,15 @@ release_package:
       else
         npm run build
       fi
-    - npm pack
+    - |
+      if command -v npm >/dev/null 2>&1; then
+        npm pack
+      elif command -v bun >/dev/null 2>&1; then
+        bun pm pack
+      else
+        echo "No pack tool available (npm/bun)." >&2
+        exit 1
+      fi
   artifacts:
     when: on_success
     expire_in: 1 week
