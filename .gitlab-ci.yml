@@ -13,30 +13,36 @@ workflow:
 default:
   interruptible: true
   tags:
-    - docker-runner
+    - docker-image-build-runner
+    - debian-shell
   cache:
-    key: npm-${CI_COMMIT_REF_SLUG}
+    key: yarn-${CI_COMMIT_REF_SLUG}
     paths:
       - node_modules/
-      - .npm/
+      - .yarn-cache/
   before_script:
-    - command -v npm >/dev/null 2>&1 || (echo "npm is required. Install Node.js >=22 on this runner." >&2; exit 1)
+    - command -v yarn >/dev/null 2>&1 || (echo "yarn is required. Install Yarn 1.22.22 on this runner." >&2; exit 1)
     - |
       node -e 'const major=+process.versions.node.split(".")[0]; if(major<22){console.error("Node.js >=22 is required. Current: "+process.versions.node); process.exit(1)}'
-    - test -f package-lock.json || (echo "package-lock.json is required. Run npm install and commit lockfile." >&2; exit 1)
-    - npm config set cache .npm --global
-    - npm ci --no-audit --no-fund
+    - test "$(yarn --version)" = "1.22.22" || (echo "Yarn 1.22.22 is required. Current: $(yarn --version)" >&2; exit 1)
+    - export YARN_CACHE_FOLDER=.yarn-cache
+    - |
+      if [ -f yarn.lock ]; then
+        yarn install --frozen-lockfile --non-interactive
+      else
+        yarn install --non-interactive
+      fi
 
 typecheck:
   stage: verify
   script:
-    - npm run typecheck
+    - yarn typecheck
 
 build:
   stage: verify
   needs: ["typecheck"]
   script:
-    - npm run build
+    - yarn build
   artifacts:
     when: on_success
     expire_in: 1 week
@@ -51,10 +57,10 @@ release_package:
       when: manual
     - when: never
   script:
-    - npm run build
-    - npm pack
+    - yarn build
+    - yarn pack --filename package.tgz
   artifacts:
     when: on_success
     expire_in: 1 week
     paths:
-      - "*.tgz"
+      - package.tgz

@@ -26,10 +26,10 @@
 	"files": [
 		"dist"
 	],
-	"packageManager": "npm@10.9.3",
+	"packageManager": "yarn@1.22.22",
 	"engines": {
 		"node": ">=22",
-		"npm": ">=10"
+		"yarn": "1.22.22"
 	},
 	"scripts": {
 		"typecheck": "tsc --noEmit",
