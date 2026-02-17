@@ -21,11 +21,15 @@ default:
       - node_modules/
       - .yarn-cache/
   before_script:
-    - command -v yarn >/dev/null 2>&1 || (echo "yarn is required. Install Yarn 1.22.22 on this runner." >&2; exit 1)
+    - 'command -v yarn >/dev/null 2>&1 || (echo "yarn is required. Install Yarn 1.22.22 on this runner." >&2; exit 1)'
     - |
       node -e 'const major=+process.versions.node.split(".")[0]; if(major<22){console.error("Node.js >=22 is required. Current: "+process.versions.node); process.exit(1)}'
-    - test "$(yarn --version)" = "1.22.22" || (echo "Yarn 1.22.22 is required. Current: $(yarn --version)" >&2; exit 1)
-    - export YARN_CACHE_FOLDER=.yarn-cache
+    - |
+      if [ "$(yarn --version)" != "1.22.22" ]; then
+        echo "Yarn 1.22.22 is required. Current: $(yarn --version)" >&2
+        exit 1
+      fi
+    - 'export YARN_CACHE_FOLDER=.yarn-cache'
     - |
       if [ -f yarn.lock ]; then
         yarn install --frozen-lockfile --non-interactive
