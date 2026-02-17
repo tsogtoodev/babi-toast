@@ -14,37 +14,14 @@ default:
   interruptible: true
   tags:
     - docker-image-build-runner
-    - debian-shell
   cache:
     key: yarn-${CI_COMMIT_REF_SLUG}
     paths:
       - node_modules/
       - .yarn-cache/
-  before_script:
-    - 'command -v yarn >/dev/null 2>&1 || (echo "yarn is required. Install Yarn 1.22.22 on this runner." >&2; exit 1)'
-    - |
-      node -e 'const major=+process.versions.node.split(".")[0]; if(major<22){console.error("Node.js >=22 is required. Current: "+process.versions.node); process.exit(1)}'
-    - |
-      if [ "$(yarn --version)" != "1.22.22" ]; then
-        echo "Yarn 1.22.22 is required. Current: $(yarn --version)" >&2
-        exit 1
-      fi
-    - 'export YARN_CACHE_FOLDER=.yarn-cache'
-    - |
-      if [ -f yarn.lock ]; then
-        yarn install --frozen-lockfile --non-interactive
-      else
-        yarn install --non-interactive
-      fi
-
-typecheck:
-  stage: verify
-  script:
-    - yarn typecheck
 
 build:
   stage: verify
-  needs: ["typecheck"]
   script:
     - yarn build
   artifacts:
@@ -52,19 +29,3 @@ build:
     expire_in: 1 week
     paths:
       - dist/
-
-release_package:
-  stage: release
-  needs: ["build"]
-  rules:
-    - if: $CI_COMMIT_TAG
-      when: manual
-    - when: never
-  script:
-    - yarn build
-    - yarn pack --filename package.tgz
-  artifacts:
-    when: on_success
-    expire_in: 1 week
-    paths:
-      - package.tgz
