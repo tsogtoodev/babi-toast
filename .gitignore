@@ -27,3 +27,6 @@ coverage/
 # Local notes
 AGENTS.md
 PROJECT_ANALYSIS.md
+
+# NPM
+.npmrc
