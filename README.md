@@ -2,13 +2,19 @@
 
 ## Usage
 
+### Installation
+
+```bash
+yarn add @tsogtbayar/babi-toast --registry=https://git.bolor.net/api/v4/projects/844/packages/npm/
+```
+
 ### Mount the toaster
 
 ```vue
 <!-- App.vue -->
 <script setup>
-import { Toaster } from "babi-vue";
-import "babi-vue/styles.css";
+import { Toaster } from "@tsogtbayar/babi-toast";
+import "@tsogtbayar/babi-toast/styles.css";
 </script>
 
 <template>
@@ -20,13 +26,14 @@ import "babi-vue/styles.css";
 ### Show toasts
 
 ```ts
-import { babi } from "babi-vue";
+import { babi } from "@tsogtbayar/babi-toast";
 
-babi.success({ title: "Saved", description: "Your changes have been saved." });
-babi.error({ title: "Error", description: "Something went wrong." });
-babi.warning({ title: "Warning", description: "Disk space is low." });
-babi.info({ title: "Info", description: "New version available." });
+babi.success({ fill: "#000000", title: "Saved", description: "Your changes have been saved." });
+babi.error({ fill: "#000000", title: "Error", description: "Something went wrong." });
+babi.warning({ fill: "#000000", title: "Warning", description: "Disk space is low." });
+babi.info({ fill: "#000000", title: "Info", description: "New version available." });
 babi.action({
+  fill: "#000000",
   title: "Action",
   description: "Click the button below.",
   button: { title: "Undo", onClick: () => console.log("Undone!") },
