@@ -8,6 +8,9 @@
 
 ## Medium Priority
 
+- [ ] Ability to Promise morph to other components.
+  - Needed for chimege reader project.
+
 - [ ] Fix `offset` handling for numeric `0`.
   - Current truthy checks ignore valid zero offsets in viewport positioning.
 
