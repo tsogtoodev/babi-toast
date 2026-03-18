@@ -1,10 +1,12 @@
 import {
 	type CSSProperties,
+	type Component,
 	type PropType,
 	type VNode,
 	computed,
 	defineComponent,
 	h,
+	isVNode,
 	nextTick,
 	onMounted,
 	onUnmounted,
@@ -37,6 +39,8 @@ type State = BabiState;
 interface View {
 	title?: string;
 	description?: VNode | string;
+	component?: Component | VNode;
+	componentProps?: Record<string, unknown>;
 	state: State;
 	icon?: VNode | null;
 	styles?: BabiStyles;
@@ -93,6 +97,14 @@ export default defineComponent({
 		state: { type: String as PropType<State>, default: "success" },
 		title: { type: String, default: undefined },
 		description: { type: [String, Object] as PropType<VNode | string>, default: undefined },
+		component: {
+			type: [Object, Function] as PropType<Component | VNode>,
+			default: undefined,
+		},
+		componentProps: {
+			type: Object as PropType<Record<string, unknown>>,
+			default: undefined,
+		},
 		position: { type: String as PropType<"left" | "center" | "right">, default: "left" },
 		expand: { type: String as PropType<"top" | "bottom">, default: "bottom" },
 		class: { type: String, default: undefined },
@@ -114,6 +126,8 @@ export default defineComponent({
 		const next = computed<View>(() => ({
 			title: resolvedTitle.value,
 			description: props.description,
+			component: props.component,
+			componentProps: props.componentProps,
 			state: props.state,
 			icon: props.icon,
 			styles: props.styles,
@@ -128,13 +142,24 @@ export default defineComponent({
 		const pillWidth = ref(0);
 		const contentHeight = ref(0);
 
-		const hasDesc = computed(() => Boolean(view.value.description) || Boolean(view.value.button));
+		const hasCustomComponent = computed(() => Boolean(view.value.component));
+		const hasBody = computed(() =>
+			Boolean(view.value.description) ||
+			Boolean(view.value.button) ||
+			hasCustomComponent.value,
+		);
 		const isLoading = computed(() => view.value.state === "loading");
-		const open = computed(() => hasDesc.value && isExpanded.value && !isLoading.value);
-		const allowExpand = computed(() =>
-			isLoading.value
-				? false
-				: (props.canExpand ?? (!props.interruptKey || props.interruptKey === props.id)),
+		const open = computed(() =>
+			hasBody.value &&
+			isExpanded.value &&
+			(!isLoading.value || hasCustomComponent.value),
+		);
+		const allowExpand = computed(() => {
+			if (isLoading.value && !hasCustomComponent.value) return false;
+			return props.canExpand ?? (!props.interruptKey || props.interruptKey === props.id);
+		});
+		const hasExpandableBody = computed(() =>
+			hasBody.value && (!isLoading.value || hasCustomComponent.value),
 		);
 
 		const headerKey = computed(() => `${view.value.state}-${view.value.title}`);
@@ -205,7 +230,7 @@ export default defineComponent({
 				contentRo.disconnect();
 				contentRo = null;
 			}
-			if (!hasDesc.value) {
+			if (!hasBody.value) {
 				contentHeight.value = 0;
 				return;
 			}
@@ -243,7 +268,7 @@ export default defineComponent({
 			nextTick(setupPillObserver);
 		});
 
-		watch(hasDesc, () => {
+		watch(hasBody, () => {
 			nextTick(setupContentObserver);
 		});
 
@@ -316,9 +341,12 @@ export default defineComponent({
 		/* ----------------------------- Auto expand/collapse ----------------------- */
 
 		watch(
-			[() => props.autoExpandDelayMs, () => props.autoCollapseDelayMs, hasDesc, allowExpand, () => props.exiting, applied],
+			[() => props.autoExpandDelayMs, () => props.autoCollapseDelayMs, hasExpandableBody, allowExpand, () => props.exiting, applied],
 			() => {
-				if (!hasDesc.value) return;
+				if (!hasExpandableBody.value) {
+					isExpanded.value = false;
+					return;
+				}
 
 				if (autoExpandTimer) clearTimeout(autoExpandTimer);
 				if (autoCollapseTimer) clearTimeout(autoCollapseTimer);
@@ -357,7 +385,7 @@ export default defineComponent({
 		const minExpanded = HEIGHT * MIN_EXPAND_RATIO;
 
 		const rawExpanded = computed(() =>
-			hasDesc.value
+			hasBody.value
 				? Math.max(minExpanded, HEIGHT + contentHeight.value)
 				: minExpanded,
 		);
@@ -370,7 +398,7 @@ export default defineComponent({
 		});
 
 		const expanded = computed(() => (open.value ? rawExpanded.value : frozenExpanded));
-		const svgHeight = computed(() => (hasDesc.value ? Math.max(expanded.value, minExpanded) : HEIGHT));
+		const svgHeight = computed(() => (hasBody.value ? Math.max(expanded.value, minExpanded) : HEIGHT));
 		const expandedContent = computed(() => Math.max(0, expanded.value - HEIGHT));
 		const resolvedPillWidth = computed(() => Math.max(pillWidth.value || HEIGHT, HEIGHT));
 		const pillHeight = computed(() => HEIGHT + blur.value * 3);
@@ -400,7 +428,7 @@ export default defineComponent({
 
 		function handleEnter(e: MouseEvent) {
 			emit("mouseenter", e);
-			if (hasDesc.value) isExpanded.value = true;
+			if (hasExpandableBody.value) isExpanded.value = true;
 		}
 
 		function handleLeave(e: MouseEvent) {
@@ -466,6 +494,13 @@ export default defineComponent({
 		function getIcon(v: View) {
 			if (v.icon !== undefined) return v.icon;
 			return STATE_ICON[v.state]();
+		}
+
+		function renderComponent(v: View) {
+			if (!v.component) return null;
+			return isVNode(v.component)
+				? v.component
+				: h(v.component as Component, v.componentProps);
 		}
 
 		/* --------------------------------- Render --------------------------------- */
@@ -563,7 +598,7 @@ export default defineComponent({
 			];
 
 			// Content
-			if (hasDesc.value) {
+			if (hasBody.value) {
 				const descChildren: VNode[] = [];
 				if (v.description) {
 					if (typeof v.description === "string") {
@@ -571,6 +606,10 @@ export default defineComponent({
 					} else {
 						descChildren.push(v.description);
 					}
+				}
+				const customComponent = renderComponent(v);
+				if (customComponent) {
+					descChildren.push(customComponent);
 				}
 				if (v.button) {
 					descChildren.push(

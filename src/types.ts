@@ -1,4 +1,4 @@
-import type { VNode } from "vue";
+import type { Component, VNode } from "vue";
 
 export type BabiState =
 	| "success"
@@ -34,9 +34,12 @@ export type BabiPosition = (typeof BABI_POSITIONS)[number];
 export interface BabiOptions {
 	title?: string;
 	description?: VNode | string;
+	component?: Component | VNode;
+	componentProps?: Record<string, unknown>;
 	position?: BabiPosition;
 	duration?: number | null;
 	icon?: VNode | null;
+	state?: BabiState;
 	styles?: BabiStyles;
 	fill?: string;
 	roundness?: number;

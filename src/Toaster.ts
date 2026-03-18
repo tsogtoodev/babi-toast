@@ -249,6 +249,8 @@ export default defineComponent({
 								state: item.state,
 								title: item.title,
 								description: item.description,
+								component: item.component,
+								componentProps: item.componentProps,
 								position: pill,
 								expand,
 								icon: item.icon,

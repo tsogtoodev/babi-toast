@@ -3,7 +3,6 @@ import type {
 	BabiButton,
 	BabiOptions,
 	BabiPosition,
-	BabiState,
 	BabiStyles,
 } from "./types";
 
@@ -23,7 +22,6 @@ export const expandDir = (pos: BabiPosition) =>
 
 export interface InternalBabiOptions extends BabiOptions {
 	id?: string;
-	state?: BabiState;
 }
 
 export interface BabiItem extends InternalBabiOptions {
@@ -121,8 +119,8 @@ const createToast = (options: InternalBabiOptions) => {
 	const live = store.toasts.filter((t) => !t.exiting);
 	const merged = mergeOptions(options);
 
-	const id = merged.id ?? "babi-default";
-	const prev = live.find((t) => t.id === id);
+	const id = merged.id ?? generateId();
+	const prev = merged.id ? live.find((t) => t.id === id) : undefined;
 	const item = buildBabiItem(merged, id, prev?.position);
 
 	if (prev) {
@@ -142,7 +140,7 @@ const updateToast = (id: string, options: InternalBabiOptions) => {
 };
 
 export interface BabiPromiseOptions<T = unknown> {
-	loading: Pick<BabiOptions, "title" | "icon">;
+	loading: BabiOptions;
 	success: BabiOptions | ((data: T) => BabiOptions);
 	error: BabiOptions | ((err: unknown) => BabiOptions);
 	action?: BabiOptions | ((data: T) => BabiOptions);
