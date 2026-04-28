@@ -1,9 +1,8 @@
-import type { VNode } from "vue";
+import { PixelGridLoader } from "./icons";
 import type {
-	BabiButton,
 	BabiOptions,
 	BabiPosition,
-	BabiStyles,
+	BabiToasterOptions,
 } from "./types";
 
 /* -------------------------------- Constants ------------------------------- */
@@ -45,7 +44,7 @@ export const store = {
 	toasts: [] as BabiItem[],
 	listeners: new Set<BabiListener>(),
 	position: "top-right" as BabiPosition,
-	options: undefined as Partial<BabiOptions> | undefined,
+	options: undefined as BabiToasterOptions | undefined,
 
 	emit() {
 		for (const fn of this.listeners) fn(this.toasts);
@@ -92,11 +91,18 @@ const resolveAutopilot = (
 	};
 };
 
-const mergeOptions = (options: InternalBabiOptions) => ({
-	...store.options,
-	...options,
-	styles: { ...store.options?.styles, ...options.styles },
-});
+const mergeOptions = (options: InternalBabiOptions) => {
+	const {
+		promiseLoadingIndicator: _indicator,
+		promiseLoadingIndicatorPreset: _preset,
+		...globalOptions
+	} = store.options ?? {};
+	return {
+		...globalOptions,
+		...options,
+		styles: { ...globalOptions.styles, ...options.styles },
+	};
+};
 
 const buildBabiItem = (
 	merged: InternalBabiOptions,
@@ -147,6 +153,20 @@ export interface BabiPromiseOptions<T = unknown> {
 	position?: BabiPosition;
 }
 
+const withPromiseLoadingDefaults = (loading: BabiOptions): BabiOptions => {
+	if (
+		loading.icon !== undefined ||
+		store.options?.promiseLoadingIndicator !== "pixel-grid"
+	) {
+		return loading;
+	}
+
+	return {
+		...loading,
+		icon: PixelGridLoader(store.options.promiseLoadingIndicatorPreset),
+	};
+};
+
 export const babi = {
 	show: (opts: BabiOptions) => createToast(opts).id,
 	success: (opts: BabiOptions) =>
@@ -162,7 +182,7 @@ export const babi = {
 		opts: BabiPromiseOptions<T>,
 	): Promise<T> => {
 		const { id } = createToast({
-			...opts.loading,
+			...withPromiseLoadingDefaults(opts.loading),
 			state: "loading",
 			duration: null,
 			position: opts.position,
