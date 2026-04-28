@@ -2,6 +2,7 @@ import {
 	createApp,
 	defineComponent,
 	h,
+	nextTick,
 	ref,
 } from "vue";
 import { Toaster, babi } from "@tsogtbayar/babi-toast";
@@ -13,6 +14,33 @@ const POSITIONS = [
 	"bottom-left",
 	"bottom-center",
 	"bottom-right",
+];
+
+const PIXEL_GRID_PRESETS = [
+	"wave-lr",
+	"wave-rl",
+	"wave-tb",
+	"wave-bt",
+	"spiral-cw",
+	"corners-first",
+	"center-out",
+	"diagonal-tl",
+	"snake",
+	"cross",
+	"checkerboard",
+	"rain",
+	"pinwheel",
+	"orbit",
+	"converge",
+	"zigzag",
+	"aurora",
+	"ember",
+	"prism",
+	"neon-cross",
+	"tide",
+	"sunset",
+	"toxic",
+	"frost",
 ];
 
 const ProgressCard = defineComponent({
@@ -273,6 +301,7 @@ const App = defineComponent({
 	setup() {
 		const counter = ref(0);
 		const lastLoadingId = ref(null);
+		const activePixelGridPreset = ref("wave-lr");
 		const eventLog = ref("Бэлэн. Доорх хэсгүүдээр API-ийн бүх урсгалыг шалгаж болно.");
 
 		function log(message) {
@@ -391,6 +420,34 @@ const App = defineComponent({
 				duration: 8000,
 			});
 			log("`autopilot: false` тохиргоотой toast ажиллалаа.");
+		}
+
+		async function showPixelGridPromiseLoader(preset = "wave-lr") {
+			activePixelGridPreset.value = preset;
+			await nextTick();
+			babi.promise(
+				new Promise((resolve) => {
+					setTimeout(() => resolve({ files: 24, preset }), 1800);
+				}),
+				{
+					loading: {
+						fill: "#000000",
+						title: preset,
+						description: "Promise loading badge нь сонгосон 3x3 pixel-grid preset ашиглана.",
+					},
+					success: ({ files, preset: donePreset }) => ({
+						fill: "#000000",
+						title: `${donePreset} дууслаа`,
+						description: `${files} файл боловсруулагдлаа.`,
+					}),
+					error: (err) => ({
+						fill: "#000000",
+						title: "Pixel grid demo алдаа",
+						description: String(err),
+					}),
+				},
+			);
+			log(`Pixel-grid promise loading indicator demo ажиллалаа. preset=${preset}`);
 		}
 
 		function showComponentToast() {
@@ -716,6 +773,10 @@ const App = defineComponent({
 			h("div", { class: "demo-shell" }, [
 				h(Toaster, {
 					position: "top-right",
+					options: {
+						promiseLoadingIndicator: "pixel-grid",
+						promiseLoadingIndicatorPreset: activePixelGridPreset.value,
+					},
 					offset: {
 						top: 18,
 						right: 18,
@@ -752,6 +813,11 @@ const App = defineComponent({
 						actionButton("Promise action", "Амжилттай promise `action` төлөвт дуусна.", showPromiseAction),
 						actionButton("Нэргүй toast stack", "Default id-ууд давтагдахгүй эсэхийг шалгана.", showStacking),
 					]),
+					renderSection("Pixel-grid preset-үүд", "Original 3-pixel-grid preset бүрийг promise loading badge дээр шалгана.", [
+						...PIXEL_GRID_PRESETS.map((preset) =>
+							actionButton(preset, `${preset} preset-ийг loading badge дээр харуулна.`, () => showPixelGridPromiseLoader(preset)),
+						),
+					], "wide"),
 					renderSection("Байрлал ба цэвэрлэх үйлдэл", "Position routing болон store clearing helper-уудыг шалгана.", [
 						...POSITIONS.map((position) =>
 							actionButton(position, `${position} байрлалд toast илгээнэ.`, () => showPositionToast(position)),

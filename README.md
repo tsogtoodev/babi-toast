@@ -28,10 +28,20 @@ import "@tsogtbayar/babi-toast/styles.css";
 </script>
 
 <template>
-  <Toaster position="top-right" />
+  <Toaster
+    position="top-right"
+    :options="{
+      promiseLoadingIndicator: 'pixel-grid',
+      promiseLoadingIndicatorPreset: 'wave-lr',
+    }"
+  />
   <RouterView />
 </template>
 ```
+
+Set `promiseLoadingIndicator` to `"pixel-grid"` to use the 3x3 pixel loader for `babi.promise(...)` loading states. Explicit `loading.icon` values still take priority.
+
+Available `promiseLoadingIndicatorPreset` values: `"wave-lr"`, `"wave-rl"`, `"wave-tb"`, `"wave-bt"`, `"spiral-cw"`, `"corners-first"`, `"center-out"`, `"diagonal-tl"`, `"snake"`, `"cross"`, `"checkerboard"`, `"rain"`, `"pinwheel"`, `"orbit"`, `"converge"`, `"zigzag"`, `"aurora"`, `"ember"`, `"prism"`, `"neon-cross"`, `"tide"`, `"sunset"`, `"toxic"`, and `"frost"`.
 
 ### Show toasts
 

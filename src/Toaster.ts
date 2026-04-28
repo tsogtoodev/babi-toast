@@ -24,8 +24,8 @@ import {
 } from "./store";
 import {
 	BABI_POSITIONS,
-	type BabiOptions,
 	type BabiPosition,
+	type BabiToasterOptions,
 } from "./types";
 
 export default defineComponent({
@@ -40,7 +40,7 @@ export default defineComponent({
 			default: undefined,
 		},
 		options: {
-			type: Object as () => Partial<BabiOptions> | undefined,
+			type: Object as () => BabiToasterOptions | undefined,
 			default: undefined,
 		},
 	},

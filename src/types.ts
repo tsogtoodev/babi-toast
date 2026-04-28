@@ -46,3 +46,36 @@ export interface BabiOptions {
 	autopilot?: boolean | { expand?: number; collapse?: number };
 	button?: BabiButton;
 }
+
+export type BabiPromiseLoadingIndicator = "default" | "pixel-grid";
+
+export type BabiPixelGridPreset =
+	| "wave-lr"
+	| "wave-rl"
+	| "wave-tb"
+	| "wave-bt"
+	| "spiral-cw"
+	| "corners-first"
+	| "center-out"
+	| "diagonal-tl"
+	| "snake"
+	| "cross"
+	| "checkerboard"
+	| "rain"
+	| "pinwheel"
+	| "orbit"
+	| "converge"
+	| "zigzag"
+	| "aurora"
+	| "ember"
+	| "prism"
+	| "neon-cross"
+	| "tide"
+	| "sunset"
+	| "toxic"
+	| "frost";
+
+export interface BabiToasterOptions extends Partial<BabiOptions> {
+	promiseLoadingIndicator?: BabiPromiseLoadingIndicator;
+	promiseLoadingIndicatorPreset?: BabiPixelGridPreset;
+}
