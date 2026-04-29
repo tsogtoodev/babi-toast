@@ -5,7 +5,7 @@ import {
 	nextTick,
 	ref,
 } from "vue";
-import { Toaster, babi } from "@tsogtbayar/babi-toast";
+import { BabiPromoteViewport, Toaster, babi } from "@tsogtbayar/babi-toast";
 
 const POSITIONS = [
 	"top-left",
@@ -100,8 +100,8 @@ const RetryCard = defineComponent({
 		details: { type: Array, default: () => [] },
 		hint: { type: String, default: "" },
 		onRetry: { type: Function, required: true },
-		secondaryLabel: { type: String, default: "Мэдэгдлийг хаах" },
-		title: { type: String, default: "Арга хэмжээ шаардлагатай" },
+		secondaryLabel: { type: String, default: "Dismiss notification" },
+		title: { type: String, default: "Action required" },
 	},
 	setup(props) {
 		return () =>
@@ -129,7 +129,7 @@ const RetryCard = defineComponent({
 							type: "button",
 							onClick: () => props.onRetry(),
 						},
-						"Дахин оролдох",
+						"Try again",
 					),
 					h(
 						"button",
@@ -227,7 +227,7 @@ const AudioPlayerCard = defineComponent({
 									class: "audio-player-toggle",
 									onClick: togglePlayback,
 								},
-								playing.value ? "Түр зогсоох" : "Тоглуулах",
+								playing.value ? "Pause" : "Play",
 							),
 						]),
 						h(
@@ -258,7 +258,7 @@ const AudioPlayerCard = defineComponent({
 							props.level
 								? h("span", { class: "audio-meta-pill" }, props.level)
 								: null,
-							h("span", { class: "audio-meta-pill" }, playing.value ? "Preview идэвхтэй" : "Preview бэлэн"),
+							h("span", { class: "audio-meta-pill" }, playing.value ? "Preview active" : "Preview ready"),
 						]),
 						h("div", { class: "audio-player-actions" }, [
 							h(
@@ -268,7 +268,7 @@ const AudioPlayerCard = defineComponent({
 									class: "audio-mini-button",
 									onClick: togglePlayback,
 								},
-								playing.value ? "Эхлэл рүү" : "Сонсож үзэх",
+								playing.value ? "Restart" : "Listen",
 							),
 							h(
 								"button",
@@ -276,7 +276,7 @@ const AudioPlayerCard = defineComponent({
 									type: "button",
 									class: "audio-mini-button audio-mini-button-secondary",
 								},
-								"Waveform харах",
+								"View waveform",
 							),
 						]),
 					]),
@@ -289,7 +289,7 @@ const AudioPlayerCard = defineComponent({
 							class: "summary-cta",
 							onClick: () => props.onPrimary(),
 						},
-						"Тайлбарт хавсаргах",
+						"Attach to description",
 					)
 					: null,
 			]);
@@ -302,7 +302,7 @@ const App = defineComponent({
 		const counter = ref(0);
 		const lastLoadingId = ref(null);
 		const activePixelGridPreset = ref("wave-lr");
-		const eventLog = ref("Бэлэн. Доорх хэсгүүдээр API-ийн бүх урсгалыг шалгаж болно.");
+		const eventLog = ref("Ready. Use the sections below to exercise every API flow.");
 
 		function log(message) {
 			eventLog.value = message;
@@ -316,84 +316,84 @@ const App = defineComponent({
 		function showSuccess() {
 			babi.success({
 				fill: "#000000",
-				title: "Хадгаллаа",
-				description: "Баримтын өөрчлөлтүүд амжилттай хадгалагдлаа.",
+				title: "Saved",
+				description: "Document changes saved successfully.",
 			});
-			log("`babi.success(...)` ажиллалаа.");
+			log("`babi.success(...)` fired.");
 		}
 
 		function showError() {
 			babi.error({
 				fill: "#000000",
-				title: "Нийтлэхэд алдаа гарлаа",
-				description: "Хувилбар гаргах шалгалт энэ өөрчлөлтийг буцаалаа.",
+				title: "Publish failed",
+				description: "The release validation rolled this change back.",
 			});
-			log("`babi.error(...)` ажиллалаа.");
+			log("`babi.error(...)` fired.");
 		}
 
 		function showWarning() {
 			babi.warning({
 				fill: "#000000",
-				title: "Дискний зай бага байна",
-				description: "Рэндэрийн кэш одоогийн квотдоо тулж байна.",
+				title: "Disk space low",
+				description: "The render cache is approaching its current quota.",
 			});
-			log("`babi.warning(...)` ажиллалаа.");
+			log("`babi.warning(...)` fired.");
 		}
 
 		function showInfo() {
 			babi.info({
 				fill: "#000000",
-				title: "Шинэ хувилбар бэлэн боллоо",
-				description: "Редакторын шинэ build суулгахад бэлэн байна.",
+				title: "New version available",
+				description: "A new editor build is ready to install.",
 			});
-			log("`babi.info(...)` ажиллалаа.");
+			log("`babi.info(...)` fired.");
 		}
 
 		function showAction() {
 			babi.action({
 				fill: "#000000",
-				title: "Анхаарах зүйл байна",
-				description: "Хуучин ноорог илэрлээ. Хэрэгтэй бол сэргээнэ үү.",
+				title: "Heads up",
+				description: "We found an old draft. Restore it if you need it.",
 				button: {
-					title: "Ноорог сэргээх",
+					title: "Restore draft",
 					onClick: () => {
-						log("`babi.action(...)` доторх товч дарлаа.");
+						log("Clicked the button inside `babi.action(...)`.");
 						babi.success({
 							fill: "#000000",
-							title: "Ноорог сэргээгдлээ",
-							description: "Өмнөх ноорог редакторт буцаж орлоо.",
+							title: "Draft restored",
+							description: "Your previous draft is back in the editor.",
 						});
 					},
 				},
 			});
-			log("`babi.action(...)` товчтойгоор ажиллалаа.");
+			log("`babi.action(...)` fired with a button.");
 		}
 
 		function showGenericLoading() {
 			lastLoadingId.value = babi.show({
 				fill: "#000000",
-				title: "Файлууд илгээж байна",
+				title: "Uploading files",
 				state: "loading",
 				duration: null,
-				description: "Энэ нь ерөнхий `babi.show(...)` API-г ашиглаж байна.",
+				description: "This uses the generic `babi.show(...)` API.",
 			});
-			log(`Ерөнхий loading toast \`babi.show(...)\`-оор ажиллалаа. id=${lastLoadingId.value}`);
+			log(`Generic loading toast fired via \`babi.show(...)\`. id=${lastLoadingId.value}`);
 		}
 
 		function dismissLastLoading() {
 			if (!lastLoadingId.value) {
-				log("Одоогоор dismiss хийх loading toast алга.");
+				log("No loading toast to dismiss right now.");
 				return;
 			}
 			babi.dismiss(lastLoadingId.value);
-			log(`Хянаж байсан toast-ыг \`babi.dismiss(${lastLoadingId.value})\`-оор хаалаа.`);
+			log(`Tracked toast dismissed via \`babi.dismiss(${lastLoadingId.value})\`.`);
 			lastLoadingId.value = null;
 		}
 
 		function showCustomStyles() {
 			babi.info({
-				title: "Тусгай загвартай toast",
-				description: "Fill, roundness, icon болон class override-ууд идэвхтэй байна.",
+				title: "Custom-styled toast",
+				description: "Fill, roundness, icon, and class overrides are active.",
 				fill: "#f3e2c8",
 				roundness: 26,
 				icon: h("span", { style: "font-size:14px;" }, "✦"),
@@ -404,22 +404,22 @@ const App = defineComponent({
 					button: "demo-toast-button",
 				},
 				button: {
-					title: "Шалгах",
-					onClick: () => log("Тусгай загвартай toast-ын товчийг дарлаа."),
+					title: "Check",
+					onClick: () => log("Clicked the button on the custom-styled toast."),
 				},
 			});
-			log("Тусгай fill, roundness, icon болон style class-тай toast ажиллалаа.");
+			log("Toast with custom fill, roundness, icon, and style classes fired.");
 		}
 
 		function showAutopilotOff() {
 			babi.info({
 				fill: "#000000",
-				title: "Autopilot унтраалттай",
-				description: "Энэ toast hover үед нээлттэй үлдэнэ, харин автоматаар дэлгэх/хумих хөдөлгөөн хийхгүй.",
+				title: "Autopilot off",
+				description: "This toast stays open while hovered but does not auto-expand or auto-collapse.",
 				autopilot: false,
 				duration: 8000,
 			});
-			log("`autopilot: false` тохиргоотой toast ажиллалаа.");
+			log("Toast with `autopilot: false` fired.");
 		}
 
 		async function showPixelGridPromiseLoader(preset = "wave-lr") {
@@ -433,47 +433,47 @@ const App = defineComponent({
 					loading: {
 						fill: "#000000",
 						title: preset,
-						description: "Promise loading badge нь сонгосон 3x3 pixel-grid preset ашиглана.",
+						description: "The promise loading badge uses the selected 3x3 pixel-grid preset.",
 					},
 					success: ({ files, preset: donePreset }) => ({
 						fill: "#000000",
-						title: `${donePreset} дууслаа`,
-						description: `${files} файл боловсруулагдлаа.`,
+						title: `${donePreset} complete`,
+						description: `${files} files processed.`,
 					}),
 					error: (err) => ({
 						fill: "#000000",
-						title: "Pixel grid demo алдаа",
+						title: "Pixel grid demo error",
 						description: String(err),
 					}),
 				},
 			);
-			log(`Pixel-grid promise loading indicator demo ажиллалаа. preset=${preset}`);
+			log(`Pixel-grid promise loading indicator demo fired. preset=${preset}`);
 		}
 
 		function showComponentToast() {
 			babi.show({
 				fill: "#000000",
-				title: "Кампанит ажлын deck илгээж байна",
+				title: "Uploading campaign deck",
 				state: "loading",
 				duration: null,
 				component: ProgressCard,
 				componentProps: {
-					caption: "Шууд upload сесс",
-					label: "Илгээгдсэн asset",
+					caption: "Live upload session",
+					label: "Assets uploaded",
 					milestones: [
-						"Гол видеог шинэ кодчилолд оруулж байна",
-						"Статик зургуудыг багцалж байна",
-						"Motion preset-үүдийг синк хийж байна",
+						"Re-encoding the master video",
+						"Bundling static images",
+						"Syncing motion presets",
 					],
 					stats: [
-						{ label: "Файл", value: "18/42" },
-						{ label: "Хурд", value: "6.4 MB/s" },
-						{ label: "Үлдсэн", value: "14с" },
+						{ label: "Files", value: "18/42" },
+						{ label: "Speed", value: "6.4 MB/s" },
+						{ label: "Remaining", value: "14s" },
 					],
 					value: 42,
 				},
 			});
-			log("Custom component body-той toast ажиллалаа.");
+			log("Toast with a custom component body fired.");
 		}
 
 		function showAudioUploadDemo() {
@@ -481,36 +481,36 @@ const App = defineComponent({
 				new Promise((resolve) => {
 					setTimeout(() => resolve({
 						duration: "02:48",
-						title: "Подкастын танилцуулга",
-						voice: "Эмэгтэй хоолой · 48 kHz",
+						title: "Podcast intro",
+						voice: "Female voice · 48 kHz",
 						waveform: [32, 58, 44, 66, 41, 77, 53, 37, 69, 49, 61, 34],
 					}), 2600);
 				}),
 				{
 					loading: {
 						fill: "#000000",
-						title: "Аудио файл илгээж байна",
+						title: "Uploading audio file",
 						component: ProgressCard,
 						componentProps: {
-							caption: "Upload үргэлжилж байна",
+							caption: "Upload in progress",
 							label: "voice_intro_final.wav",
 							milestones: [
-								"Шуугиан шүүх мета өгөгдөл шалгаж байна",
-								"Loudness normalization тохиргоо баталгаажиж байна",
-								"Waveform preview үүсгэж байна",
+								"Validating noise-reduction metadata",
+								"Confirming loudness normalization settings",
+								"Generating waveform preview",
 							],
 							stats: [
-								{ label: "Хэмжээ", value: "12.4 MB" },
-								{ label: "Урт", value: "02:48" },
-								{ label: "Формат", value: "WAV 48k" },
+								{ label: "Size", value: "12.4 MB" },
+								{ label: "Length", value: "02:48" },
+								{ label: "Format", value: "WAV 48k" },
 							],
 							value: 63,
 						},
 					},
 					success: (audio) => ({
 						fill: "#000000",
-						title: "Аудио бэлэн боллоо",
-						description: "Upload дууслаа. Доороос preview тоглуулж болно.",
+						title: "Audio ready",
+						description: "Upload complete. Play the preview below.",
 						component: AudioPlayerCard,
 						componentProps: {
 							duration: audio.duration,
@@ -521,23 +521,83 @@ const App = defineComponent({
 							voice: audio.voice,
 							waveform: audio.waveform,
 							onPrimary: () => {
-								log("Аудио preview-г тайлбарт хавсаргах үйлдэл ажиллалаа.");
+								log("Attached the audio preview to the description.");
 								babi.success({
 									fill: "#000000",
-									title: "Аудио хавсаргалаа",
-									description: "Preview player-тэй хамт тайлбарын мөрөнд нэмэгдлээ.",
+									title: "Audio attached",
+									description: "Added to the description with the preview player.",
 								});
 							},
 						},
 					}),
 					error: (err) => ({
 						fill: "#000000",
-						title: "Аудио upload алдаа гарлаа",
+						title: "Audio upload failed",
 						description: String(err),
 					}),
 				},
 			);
-			log("Аудио upload-аас custom audio player руу morph хийх demo ажиллалаа.");
+			log("Audio upload → custom audio player morph demo fired.");
+		}
+
+		function showAudioTrayPromotion() {
+			babi.promise(
+				new Promise((resolve) => {
+					setTimeout(() => resolve({
+						duration: "03:21",
+						title: "Production interview",
+						voice: "Male voice · 48 kHz",
+						waveform: [44, 28, 62, 39, 71, 47, 56, 33, 68, 51, 42, 60],
+					}), 2200);
+				}),
+				{
+					loading: {
+						fill: "#000000",
+						title: "Uploading to tray",
+						component: ProgressCard,
+						componentProps: {
+							caption: "Upload in progress",
+							label: "interview_take_03.wav",
+							stats: [
+								{ label: "Size", value: "16.1 MB" },
+								{ label: "Length", value: "03:21" },
+								{ label: "Format", value: "WAV 48k" },
+							],
+							value: 48,
+						},
+					},
+					success: (audio) => ({
+						fill: "#000000",
+						title: "Landed in audio tray",
+						description: "Appeared inside the player tray.",
+						promote: {
+							to: "audio-player-tray",
+							component: AudioPlayerCard,
+							componentProps: {
+								duration: audio.duration,
+								format: "WAV • 48 kHz",
+								level: "-12 LUFS",
+								project: "Tray promotion demo",
+								title: audio.title,
+								voice: audio.voice,
+								waveform: audio.waveform,
+							},
+							successVisibleMs: 700,
+						},
+					}),
+					error: (err) => ({
+						fill: "#000000",
+						title: "Tray upload error",
+						description: String(err),
+					}),
+				},
+			);
+			log("Audio upload → tray promotion flow fired.");
+		}
+
+		function clearAudioTray() {
+			babi.clearPromoted("audio-player-tray");
+			log("Audio tray cleared.");
 		}
 
 		function showPromiseMorph() {
@@ -548,42 +608,42 @@ const App = defineComponent({
 				{
 					loading: {
 						fill: "#000000",
-						title: "Workspace хадгалж байна",
+						title: "Saving workspace",
 						component: ProgressCard,
 						componentProps: {
-							caption: "Хамтран ажиллах share link бэлдэж байна",
-							label: "Snapshot бичиж байна",
+							caption: "Preparing collaborative share link",
+							label: "Writing snapshot",
 							milestones: [
-								"Одоогийн canvas төлөвийг түгжиж байна",
-								"Comment anchor-уудыг илгээж байна",
-								"Asset reference-үүдийг индексжүүлж байна",
+								"Locking the current canvas state",
+								"Sending comment anchors",
+								"Indexing asset references",
 							],
 							stats: [
 								{ label: "Layer", value: "214" },
-								{ label: "Сэтгэгдэл", value: "7" },
-								{ label: "Хэмжээ", value: "18 MB" },
+								{ label: "Comments", value: "7" },
+								{ label: "Size", value: "18 MB" },
 							],
 							value: 12,
 						},
 					},
 					success: ({ shareUrl }) => ({
 						fill: "#000000",
-						title: "Workspace хадгалагдлаа",
+						title: "Workspace saved",
 						description: shareUrl,
 						component: SummaryCard,
 						componentProps: {
-							headline: "Snapshot баталгаажиж, нийтлэгдлээ",
+							headline: "Snapshot validated and published",
 							items: [
-								{ label: "Хувилбар", value: "v18" },
-								{ label: "Шалгагч", value: "3" },
-								{ label: "Хугацаа", value: "1.5с" },
+								{ label: "Version", value: "v18" },
+								{ label: "Reviewers", value: "3" },
+								{ label: "Time", value: "1.5s" },
 							],
-							ctaLabel: "Share link хуулах",
+							ctaLabel: "Copy share link",
 							onAction: () => {
-								log("Амжилтын summary card-аас share link хууллаа.");
+								log("Copied the share link from the success summary card.");
 								babi.info({
 									fill: "#000000",
-									title: "Share link хуулагдлаа",
+									title: "Share link copied",
 									description: shareUrl,
 								});
 							},
@@ -592,44 +652,44 @@ const App = defineComponent({
 					}),
 					error: (err) => ({
 						fill: "#000000",
-						title: "Хадгалах үед алдаа гарлаа",
+						title: "Save failed",
 						description: String(err),
 						component: RetryCard,
 						componentProps: {
 							details: [
-								"Snapshot upload баталгаажаагүй үлдлээ.",
-								"Review permission-үүд синк хийгдээгүй байна.",
+								"Snapshot upload was not confirmed.",
+								"Review permissions are not synced.",
 							],
-							hint: "Workspace network tunnel-ээ шалгаад дахин оролдоно уу.",
+							hint: "Check your workspace network tunnel and try again.",
 							onRetry: showPromiseMorph,
 						},
 					}),
 				},
 			);
-			log("`babi.promise(...)` амжилтын morph урсгал ажиллалаа.");
+			log("`babi.promise(...)` success morph flow fired.");
 		}
 
 		function showRejectingPromise() {
 			babi.promise(
 				new Promise((_, reject) => {
-					setTimeout(() => reject(new Error("Алсын архивын сангаас хариу авах хугацаа хэтэрлээ.")), 1500);
+					setTimeout(() => reject(new Error("Timed out waiting for the remote archive store.")), 1500);
 				}),
 				{
 					loading: {
 						fill: "#000000",
-						title: "Архивын сесс бэлдэж байна",
+						title: "Preparing archive session",
 						component: ProgressCard,
 						componentProps: {
-							caption: "Удаан хадгалах архив үүсгэж байна",
-							label: "Файлуудыг багцалж байна",
+							caption: "Building cold-storage archive",
+							label: "Bundling files",
 							milestones: [
-								"Эх медиа файлуудыг цуглуулж байна",
-								"Эцсийн render-үүдийг hash хийж байна",
-								"Нөөц manifest-ийг шахаж байна",
+								"Collecting source media files",
+								"Hashing final renders",
+								"Compressing backup manifest",
 							],
 							stats: [
-								{ label: "Багц", value: "9" },
-								{ label: "Архив", value: "2.4 GB" },
+								{ label: "Batches", value: "9" },
+								{ label: "Archive", value: "2.4 GB" },
 								{ label: "Node", value: "4" },
 							],
 							value: 67,
@@ -637,27 +697,27 @@ const App = defineComponent({
 					},
 					success: {
 						fill: "#000000",
-						title: "Архивлагдлаа",
+						title: "Archived",
 					},
 					error: (err) => ({
 						fill: "#000000",
-						title: "Архивлах үед алдаа гарлаа",
+						title: "Archive failed",
 						description: err instanceof Error ? err.message : String(err),
 						component: RetryCard,
 						componentProps: {
 							details: [
-								"Алсын архивын сан хэт удаан хариуллаа.",
-								"Manifest шалгалт бүрэн дуусаагүй байна.",
+								"The remote archive store responded too slowly.",
+								"Manifest validation did not complete.",
 							],
-							hint: "Сүүлд баталгаажсан хэсгээс үргэлжлүүлэхийн тулд дахин оролдоно уу.",
+							hint: "Try again to resume from the last confirmed segment.",
 							onRetry: showRejectingPromise,
-							secondaryLabel: "Мэдэгдлийг цэвэрлэх",
-							title: "Архивын урсгал тасалдлаа",
+							secondaryLabel: "Clear notification",
+							title: "Archive flow interrupted",
 						},
 					}),
 				},
 			).catch(() => undefined);
-			log("`babi.promise(...)` алдааны morph урсгал ажиллалаа.");
+			log("`babi.promise(...)` error morph flow fired.");
 		}
 
 		function showPromiseAction() {
@@ -668,71 +728,178 @@ const App = defineComponent({
 				{
 					loading: {
 						fill: "#000000",
-						title: "Review багц бэлдэж байна",
+						title: "Preparing review packet",
 						component: ProgressCard,
 						componentProps: {
-							caption: "Review packet-ийг эмхэтгэж байна",
-							label: "Сэтгэгдлүүдийг цуглуулж байна",
+							caption: "Compiling review packet",
+							label: "Collecting comments",
 							milestones: [
-								"Шийдэгдээгүй feedback-ийг нэгтгэж байна",
-								"Өөрчлөлтүүдийг эзэмшигчээр нь бүлэглэж байна",
-								"Approval packet үүсгэж байна",
+								"Merging unresolved feedback",
+								"Grouping changes by owner",
+								"Building approval packet",
 							],
 							stats: [
 								{ label: "Thread", value: "12" },
 								{ label: "Mention", value: "5" },
-								{ label: "Үлдсэн", value: "9с" },
+								{ label: "Remaining", value: "9s" },
 							],
 							value: 34,
 						},
 					},
 					success: {
 						fill: "#000000",
-						title: "Review бэлэн боллоо",
+						title: "Review ready",
 					},
 					error: (err) => ({
 						fill: "#000000",
-						title: "Review бэлдэхэд алдаа гарлаа",
+						title: "Review preparation failed",
 						description: String(err),
 					}),
 					action: ({ changes }) => ({
 						fill: "#000000",
-						title: "Review бэлдэгдлээ",
-						description: `${changes} сэтгэгдэл баталгаажуулалт хүлээж байна.`,
+						title: "Review prepared",
+						description: `${changes} comments awaiting confirmation.`,
 						component: SummaryCard,
 						componentProps: {
-							headline: "Баталгаажуулах багц бэлэн боллоо",
+							headline: "Approval packet ready",
 							items: [
-								{ label: "Сэтгэгдэл", value: String(changes) },
-								{ label: "Эзэмшигч", value: "4" },
-								{ label: "Түвшин", value: "Өндөр" },
+								{ label: "Comments", value: String(changes) },
+								{ label: "Owners", value: "4" },
+								{ label: "Priority", value: "High" },
 							],
-							ctaLabel: "Шалгагчдыг харах",
+							ctaLabel: "View reviewers",
 							onAction: () => {
-								log("Action summary card-аас шалгагчдын preview-г нээлээ.");
+								log("Opened the reviewer preview from the action summary card.");
 								babi.info({
 									fill: "#000000",
-									title: "Шалгагчдын preview",
-									description: "Alex, Naraa, Saran, Tuvshin нарт оноогдсон байна.",
+									title: "Reviewer preview",
+									description: "Assigned to Alex, Naraa, Saran, Tuvshin.",
 								});
 							},
 							tone: "accent",
 						},
 						button: {
-							title: "Review нээх",
+							title: "Open review",
 							onClick: () => {
-								log("Promise action-state товчийг дарлаа.");
+								log("Clicked the promise action-state button.");
 								babi.info({
 									fill: "#000000",
-									title: "Review нээгдлээ",
-									description: "Action-state promise урсгал амжилттай дууслаа.",
+									title: "Review opened",
+									description: "Action-state promise flow completed successfully.",
 								});
 							},
 						},
 					}),
 				},
 			);
-			log("`action` төгсгөлийн төлөвтэй promise урсгал ажиллалаа.");
+			log("Promise flow with `action` terminal state fired.");
+		}
+
+		async function showTokenStreamDemo() {
+			const tokens = [
+				"Hello", " there", ".", " This", " message",
+				" is", " streaming", " into", " place",
+				" token", " by", " token", ".",
+			];
+			async function* generate() {
+				let text = "";
+				for (const t of tokens) {
+					await new Promise((r) => setTimeout(r, 140));
+					text += t;
+					yield { description: text };
+				}
+				return { description: text, title: "Reply ready" };
+			}
+			babi.stream(generate(), {
+				initial: {
+					fill: "#000000",
+					title: "Composing reply",
+				},
+				success: {
+					fill: "#000000",
+				},
+			});
+			log("Async iterator token-stream toast fired.");
+		}
+
+		function showRefStreamDemo() {
+			const progress = ref(0);
+			const handle = babi.stream(progress, {
+				initial: {
+					fill: "#000000",
+					title: "Toast bound to a reactive ref",
+				},
+				frame: (v) => ({
+					description: `${v}% complete`,
+					...(v >= 100 && {
+						state: "success",
+						title: "Ref stream complete",
+					}),
+				}),
+			});
+			const tick = setInterval(() => {
+				progress.value = Math.min(100, progress.value + 8);
+				if (progress.value >= 100) clearInterval(tick);
+			}, 220);
+			log(`Vue \`ref\`-driven stream toast fired. id=${handle.id}`);
+		}
+
+		function showCallbackStreamDemo() {
+			const total = 18;
+			let sent = 0;
+			babi.stream(
+				(emit) => {
+					const tick = setInterval(() => {
+						sent += 1;
+						emit({
+							description: `${sent}/${total} files uploaded`,
+						});
+						if (sent >= total) {
+							clearInterval(tick);
+							emit.done({
+								description: `${total} files uploaded successfully.`,
+							});
+						}
+					}, 180);
+					return () => clearInterval(tick);
+				},
+				{
+					initial: {
+						fill: "#000000",
+						title: "Batch upload",
+						component: ProgressCard,
+						componentProps: {
+							caption: "Stream from callback subscriber",
+							label: "upload-batch.zip",
+							stats: [
+								{ label: "Files", value: `0/${total}` },
+								{ label: "Speed", value: "—" },
+							],
+							value: 0,
+						},
+					},
+					frame: (patch) => ({
+						...patch,
+						fill: "#000000",
+						title: "Batch upload",
+						component: ProgressCard,
+						componentProps: {
+							caption: "Stream from callback subscriber",
+							label: "upload-batch.zip",
+							stats: [
+								{ label: "Files", value: `${sent}/${total}` },
+								{ label: "Speed", value: "4.1 MB/s" },
+							],
+							value: Math.round((sent / total) * 100),
+						},
+					}),
+					success: {
+						fill: "#000000",
+						title: "Batch upload complete",
+					},
+				},
+			);
+			log("Callback-subscriber stream toast fired.");
 		}
 
 		function showStacking() {
@@ -740,32 +907,32 @@ const App = defineComponent({
 				const n = nextCount();
 				babi.success({
 					fill: "#000000",
-					title: `Дараалалд орсон зүйл ${n}`,
-					description: "Нэргүй toast-ууд өмнөхөө солихгүйгээр давхарлан харагдах ёстой.",
+					title: `Stacked item ${n}`,
+					description: "Anonymous toasts should stack without replacing earlier ones.",
 				});
 			}
-			log("Stacking шалгахын тулд гурван нэргүй toast ажиллууллаа.");
+			log("Fired three anonymous toasts to verify stacking.");
 		}
 
 		function showPositionToast(position) {
 			babi.info({
 				fill: "#000000",
 				title: position,
-				description: `Toast ${position} байрлалд гарч ирнэ.`,
+				description: `Toast appears in the ${position} slot.`,
 				position,
 			});
-			log(`${position} байрлалтай toast ажиллалаа.`);
+			log(`Toast at ${position} fired.`);
 		}
 
 		function clearAll() {
 			babi.clear();
-			log("Бүх toast-ыг `babi.clear()`-ээр цэвэрлэлээ.");
+			log("Cleared all toasts via `babi.clear()`.");
 			lastLoadingId.value = null;
 		}
 
 		function clearTopRight() {
 			babi.clear("top-right");
-			log("Зөвхөн top-right toast-уудыг `babi.clear(\"top-right\")`-ээр цэвэрлэлээ.");
+			log("Cleared only top-right toasts via `babi.clear(\"top-right\")`.");
 			lastLoadingId.value = null;
 		}
 
@@ -786,62 +953,95 @@ const App = defineComponent({
 				}),
 				h("main", { class: "demo-card" }, [
 					h("p", { class: "demo-eyebrow" }, "Babi Toast demo"),
-					h("h1", { class: "demo-title" }, "Нэг хуудсаас бүх API урсгалыг шалга."),
+					h("h1", { class: "demo-title" }, "Exercise every API flow from one page."),
 					h(
 						"p",
 						{ class: "demo-copy" },
-						"Доорх хэсгүүд helper state, ерөнхий show болон dismiss урсгал, custom body, promise morph, stacking, байрлал, clear үйлдлүүдийг бүгдийг нь хамарна.",
+						"The sections below cover helper states, generic show + dismiss flows, custom bodies, promise morphs, stacking, positioning, and clear actions.",
 					),
-					renderSection("State Helper-ууд", "Helper бүр зөв badge болон icon төлөвтэй гарч ирэх ёстой.", [
-						actionButton("Success", "`babi.success(...)`-ийг шалгана.", showSuccess),
-						actionButton("Error", "`babi.error(...)`-ийг шалгана.", showError),
-						actionButton("Warning", "`babi.warning(...)`-ийг шалгана.", showWarning),
-						actionButton("Info", "`babi.info(...)`-ийг шалгана.", showInfo),
-						actionButton("Action", "Товчтой `babi.action(...)`-ийг шалгана.", showAction),
+					renderSection("State helpers", "Each helper should appear with the correct badge and icon state.", [
+						actionButton("Success", "Exercises `babi.success(...)`.", showSuccess),
+						actionButton("Error", "Exercises `babi.error(...)`.", showError),
+						actionButton("Warning", "Exercises `babi.warning(...)`.", showWarning),
+						actionButton("Info", "Exercises `babi.info(...)`.", showInfo),
+						actionButton("Action", "Exercises `babi.action(...)` with a button.", showAction),
 					]),
-					renderSection("Үндсэн удирдлага", "Ерөнхий `show`, гар аргаар dismiss хийх, style override болон autopilot-ыг хамарна.", [
-						actionButton("Loading харуулах", "`state: \"loading\"`-той `babi.show(...)` ашиглана.", showGenericLoading),
-						actionButton("Сүүлийн loading-ийг хаах", "`babi.show(...)`-оос буцсан id-г ашиглана.", dismissLastLoading),
-						actionButton("Styled toast", "Custom fill, roundness, icon болон class-уудыг шалгана.", showCustomStyles),
-						actionButton("Autopilot off", "Body content автоматаар choreograph хийхгүй.", showAutopilotOff),
+					renderSection("Core controls", "Covers generic `show`, manual dismiss, style overrides, and autopilot.", [
+						actionButton("Show loading", "Uses `babi.show(...)` with `state: \"loading\"`.", showGenericLoading),
+						actionButton("Dismiss last loading", "Uses the id returned from `babi.show(...)`.", dismissLastLoading),
+						actionButton("Styled toast", "Exercises custom fill, roundness, icon, and classes.", showCustomStyles),
+						actionButton("Autopilot off", "Body content does not auto-choreograph.", showAutopilotOff),
 					]),
-					renderSection("Custom Body-ууд", "Шинэ component body урсгал болон бүх promise төгсгөлийн төлвүүдийг шалгана.", [
-						actionButton("Custom component", "Component body-той expandable loading toast.", showComponentToast),
-						actionButton("Аудио upload → player", "Upload metadata-аас custom audio player руу morph хийнэ.", showAudioUploadDemo),
-						actionButton("Promise success", "Нэг toast loading-оос success руу morph хийнэ.", showPromiseMorph),
-						actionButton("Promise error", "Алдаатай promise retry UI-г render хийнэ.", showRejectingPromise),
-						actionButton("Promise action", "Амжилттай promise `action` төлөвт дуусна.", showPromiseAction),
-						actionButton("Нэргүй toast stack", "Default id-ууд давтагдахгүй эсэхийг шалгана.", showStacking),
+					renderSection("Custom bodies", "Exercises the new component-body flow and every promise terminal state.", [
+						actionButton("Custom component", "Expandable loading toast with a component body.", showComponentToast),
+						actionButton("Audio upload → player", "Morphs from upload metadata into a custom audio player.", showAudioUploadDemo),
+						actionButton("Audio upload → tray", "Promotes from the toast into the right-side tray.", showAudioTrayPromotion),
+						actionButton("Clear tray", "Calls `babi.clearPromoted(\"audio-player-tray\")`.", clearAudioTray),
+						actionButton("Promise success", "Morphs a single toast from loading to success.", showPromiseMorph),
+						actionButton("Promise error", "Renders the retry UI for a failing promise.", showRejectingPromise),
+						actionButton("Promise action", "Successful promise terminates in the `action` state.", showPromiseAction),
+						actionButton("Anonymous toast stack", "Verifies default ids do not collide.", showStacking),
 					]),
-					renderSection("Pixel-grid preset-үүд", "Original 3-pixel-grid preset бүрийг promise loading badge дээр шалгана.", [
+					renderSection(
+						"Stream flow",
+						"`babi.stream(...)` consumes async iterators, Vue refs, and callback subscribers directly, producing a multi-frame live toast.",
+						[
+							actionButton(
+								"Token stream",
+								"Description grows token-by-token from an async generator.",
+								showTokenStreamDemo,
+							),
+							actionButton(
+								"Reactive ref",
+								"As `ref(0)` climbs to 100 the toast description updates.",
+								showRefStreamDemo,
+							),
+							actionButton(
+								"Callback subscriber",
+								"Streams batch upload progress into a toast with a custom component body.",
+								showCallbackStreamDemo,
+							),
+						],
+					),
+					renderSection("Pixel-grid presets", "Exercise every original 3-pixel-grid preset on the promise loading badge.", [
 						...PIXEL_GRID_PRESETS.map((preset) =>
-							actionButton(preset, `${preset} preset-ийг loading badge дээр харуулна.`, () => showPixelGridPromiseLoader(preset)),
+							actionButton(preset, `Renders the ${preset} preset on the loading badge.`, () => showPixelGridPromiseLoader(preset)),
 						),
 					], "wide"),
-					renderSection("Байрлал ба цэвэрлэх үйлдэл", "Position routing болон store clearing helper-уудыг шалгана.", [
+					renderSection("Positioning & clear actions", "Exercises position routing and store-clearing helpers.", [
 						...POSITIONS.map((position) =>
-							actionButton(position, `${position} байрлалд toast илгээнэ.`, () => showPositionToast(position)),
+							actionButton(position, `Sends a toast to the ${position} slot.`, () => showPositionToast(position)),
 						),
-						actionButton("Top-right цэвэрлэх", "`babi.clear(\"top-right\")` ашиглана.", clearTopRight),
-						actionButton("Бүгдийг цэвэрлэх", "`babi.clear()` ашиглана.", clearAll),
+						actionButton("Clear top-right", "Calls `babi.clear(\"top-right\")`.", clearTopRight),
+						actionButton("Clear everything", "Calls `babi.clear()`.", clearAll),
 					], "wide"),
 					h("div", { class: "demo-note" }, [
-						h("strong", "Гараар шалгах зүйлс"),
+						h("strong", "Manual checks"),
 						h(
 							"p",
-							"Аль нэг toast дээр hover хийхэд dismiss түр зогсоно. Promise demo-ууд нэг toast instance-ийг дахин ашиглаад, shell content-оо тухайн байрандаа morph хийх ёстой. Position товчнууд хүссэн өнцөг эсвэл төвийн эгнээнд render хийх ёстой.",
+							"Hovering any toast pauses dismiss. Promise demos reuse a single toast instance and morph their shell content in place. Position buttons should render in the requested corner or center row.",
 						),
 					]),
 					h("div", { class: "demo-log" }, [
-						h("strong", "Сүүлийн үйлдэл"),
+						h("strong", "Last action"),
 						h("p", eventLog.value),
 						h(
 							"p",
 							lastLoadingId.value
-								? `Хянаж буй loading id: ${lastLoadingId.value}`
-								: "Хянаж буй loading id: алга",
+								? `Tracked loading id: ${lastLoadingId.value}`
+								: "Tracked loading id: none",
 						),
 					]),
+				]),
+				h("aside", { class: "demo-tray" }, [
+					h("div", { class: "demo-tray-head" }, [
+						h("strong", "Audio tray"),
+						h("p", "Toasts with `promote` land here."),
+					]),
+					h(BabiPromoteViewport, {
+						name: "audio-player-tray",
+						class: "demo-tray-slot",
+					}),
 				]),
 			]);
 	},
