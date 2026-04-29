@@ -46,6 +46,7 @@ interface View {
 	styles?: BabiStyles;
 	button?: BabiButton;
 	fill: string;
+	border?: string;
 }
 
 /* ---------------------------------- Icons --------------------------------- */
@@ -94,6 +95,7 @@ export default defineComponent({
 	props: {
 		id: { type: String, required: true },
 		fill: { type: String, default: "#FFFFFF" },
+		border: { type: String, default: undefined },
 		state: { type: String as PropType<State>, default: "success" },
 		title: { type: String, default: undefined },
 		description: { type: [String, Object] as PropType<VNode | string>, default: undefined },
@@ -133,6 +135,7 @@ export default defineComponent({
 			styles: props.styles,
 			button: props.button,
 			fill: props.fill,
+			border: props.border,
 		}));
 
 		const view = ref<View>({ ...next.value });
@@ -554,9 +557,20 @@ export default defineComponent({
 				);
 			}
 
+			const borderFilter = v.border
+				? `drop-shadow(0.5px 0 0 ${v.border}) drop-shadow(-0.5px 0 0 ${v.border}) drop-shadow(0 0.5px 0 ${v.border}) drop-shadow(0 -0.5px 0 ${v.border})`
+				: undefined;
+
 			const children: VNode[] = [
 				// Canvas
-				h("div", { "data-babi-canvas": "", "data-edge": props.expand }, [
+				h(
+					"div",
+					{
+						"data-babi-canvas": "",
+						"data-edge": props.expand,
+						style: borderFilter ? `filter: ${borderFilter};` : undefined,
+					},
+					[
 					h(
 						"svg",
 						{

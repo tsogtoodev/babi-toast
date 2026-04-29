@@ -393,8 +393,9 @@ const App = defineComponent({
 		function showCustomStyles() {
 			babi.info({
 				title: "Custom-styled toast",
-				description: "Fill, roundness, icon, and class overrides are active.",
+				description: "Fill, roundness, icon, border, and class overrides are active.",
 				fill: "#f3e2c8",
+				border: "rgba(15, 23, 42, 0.18)",
 				roundness: 26,
 				icon: h("span", { style: "font-size:14px;" }, "✦"),
 				styles: {
@@ -553,6 +554,7 @@ const App = defineComponent({
 				{
 					loading: {
 						fill: "#000000",
+						border: "rgba(255, 255, 255, 0.18)",
 						title: "Uploading to tray",
 						component: ProgressCard,
 						componentProps: {
@@ -568,6 +570,7 @@ const App = defineComponent({
 					},
 					success: (audio) => ({
 						fill: "#000000",
+						border: "rgba(255, 255, 255, 0.18)",
 						title: "Landed in audio tray",
 						description: "Appeared inside the player tray.",
 						promote: {
@@ -969,7 +972,7 @@ const App = defineComponent({
 					renderSection("Core controls", "Covers generic `show`, manual dismiss, style overrides, and autopilot.", [
 						actionButton("Show loading", "Uses `babi.show(...)` with `state: \"loading\"`.", showGenericLoading),
 						actionButton("Dismiss last loading", "Uses the id returned from `babi.show(...)`.", dismissLastLoading),
-						actionButton("Styled toast", "Exercises custom fill, roundness, icon, and classes.", showCustomStyles),
+						actionButton("Styled toast", "Exercises custom fill, roundness, icon, border, and classes.", showCustomStyles),
 						actionButton("Autopilot off", "Body content does not auto-choreograph.", showAutopilotOff),
 					]),
 					renderSection("Custom bodies", "Exercises the new component-body flow and every promise terminal state.", [

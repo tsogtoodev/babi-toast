@@ -42,6 +42,7 @@ export interface BabiOptions {
 	state?: BabiState;
 	styles?: BabiStyles;
 	fill?: string;
+	border?: string;
 	roundness?: number;
 	autopilot?: boolean | { expand?: number; collapse?: number };
 	button?: BabiButton;
