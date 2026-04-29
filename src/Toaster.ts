@@ -372,6 +372,7 @@ export default defineComponent({
 								expand,
 								icon: item.icon,
 								fill: item.fill,
+								border: item.border,
 								styles: item.styles,
 								button: item.button,
 								roundness: item.roundness,
