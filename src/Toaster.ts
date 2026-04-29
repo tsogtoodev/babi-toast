@@ -16,12 +16,20 @@ import {
 	type BabiOffsetConfig,
 	type BabiOffsetValue,
 	DEFAULT_DURATION,
+	DEFAULT_SUCCESS_VISIBLE_MS,
+	cancelPromotion,
 	dismissToast,
 	expandDir,
+	flipPromotion,
 	pillAlign,
 	store,
 	timeoutKey,
 } from "./store";
+import {
+	getPromoteViewportEl,
+	prefersReducedMotion,
+	runPromotionMorph,
+} from "./promote";
 import {
 	BABI_POSITIONS,
 	type BabiPosition,
@@ -86,6 +94,10 @@ export default defineComponent({
 		onUnmounted(() => {
 			store.listeners.delete(listener);
 			clearAllTimers();
+			for (const t of promotionTimers.values()) clearTimeout(t);
+			promotionTimers.clear();
+			for (const handle of promotionInflight.values()) handle.cancel();
+			promotionInflight.clear();
 		});
 
 		/* --------------------------------- Timers --------------------------------- */
@@ -100,6 +112,8 @@ export default defineComponent({
 
 			for (const item of items) {
 				if (item.exiting) continue;
+				if (item.pendingPromote) continue;
+				if (item.placement.kind !== "toast") continue;
 				const key = timeoutKey(item);
 				if (timers.has(key)) continue;
 
@@ -110,6 +124,106 @@ export default defineComponent({
 					key,
 					window.setTimeout(() => dismissToast(item.id), dur),
 				);
+			}
+		}
+
+		/* ------------------------------ Promotion -------------------------------- */
+
+		const promotionTimers = new Map<string, number>();
+		const promotionInflight = new Map<string, { cancel: () => void }>();
+
+		function findSourceEl(id: string): HTMLElement | null {
+			return document.querySelector<HTMLElement>(
+				`[data-babi-toast][data-babi-id="${CSS.escape(id)}"]`,
+			);
+		}
+
+		function performPromotion(item: BabiItem) {
+			const promote = item.pendingPromote;
+			if (!promote) return;
+
+			const sourceEl = findSourceEl(item.id);
+			const destEl = getPromoteViewportEl(promote.to);
+
+			if (!destEl) {
+				console.warn(
+					`[babi-toast] promote target "${promote.to}" not mounted; keeping completion toast.`,
+				);
+				cancelPromotion(item.id);
+				return;
+			}
+
+			if (!sourceEl) {
+				flipPromotion(item.id);
+				return;
+			}
+
+			let flipped = false;
+			const flip = () => {
+				if (flipped) return;
+				flipped = true;
+				flipPromotion(item.id);
+			};
+
+			const morph = runPromotionMorph({
+				sourceEl,
+				destEl,
+				item,
+				reducedMotion: prefersReducedMotion(),
+				onCaptured: flip,
+			});
+			promotionInflight.set(item.id, morph);
+			morph.finished.finally(() => {
+				promotionInflight.delete(item.id);
+				flip();
+			});
+		}
+
+		function schedulePromotion(items: BabiItem[]) {
+			for (const item of items) {
+				if (!item.pendingPromote) continue;
+				if (item.exiting) continue;
+				if (item.placement.kind !== "toast") continue;
+				if (promotionTimers.has(item.id)) continue;
+
+				const delay =
+					item.pendingPromote.successVisibleMs ?? DEFAULT_SUCCESS_VISIBLE_MS;
+				promotionTimers.set(
+					item.id,
+					window.setTimeout(() => {
+						promotionTimers.delete(item.id);
+						const fresh = store.toasts.find((t) => t.id === item.id);
+						if (!fresh || !fresh.pendingPromote || fresh.exiting) return;
+						if (fresh.placement.kind !== "toast") return;
+						performPromotion(fresh);
+					}, delay),
+				);
+			}
+		}
+
+		function syncPromotionTimers(current: BabiItem[]) {
+			const live = new Set(
+				current
+					.filter(
+						(t) =>
+							t.pendingPromote &&
+							!t.exiting &&
+							t.placement.kind === "toast",
+					)
+					.map((t) => t.id),
+			);
+			for (const [id, timer] of promotionTimers) {
+				if (!live.has(id)) {
+					clearTimeout(timer);
+					promotionTimers.delete(id);
+				}
+			}
+			const present = new Set(current.map((t) => t.id));
+			for (const [id, handle] of promotionInflight) {
+				if (!present.has(id)) {
+					handle.cancel();
+					promotionInflight.delete(id);
+				}
 			}
 		}
 
@@ -129,6 +243,8 @@ export default defineComponent({
 			}
 
 			schedule(current);
+			syncPromotionTimers(current);
+			schedulePromotion(current);
 		}, { immediate: true });
 
 		/* --------------------------------- Latest --------------------------------- */
@@ -208,6 +324,7 @@ export default defineComponent({
 		const byPosition = computed(() => {
 			const map = {} as Partial<Record<BabiPosition, BabiItem[]>>;
 			for (const t of toasts.value) {
+				if (t.placement.kind !== "toast") continue;
 				const pos = t.position ?? props.position;
 				const arr = map[pos];
 				if (arr) {

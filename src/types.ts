@@ -1,4 +1,4 @@
-import type { Component, VNode } from "vue";
+import type { Component, Ref, VNode } from "vue";
 
 export type BabiState =
 	| "success"
@@ -45,6 +45,25 @@ export interface BabiOptions {
 	roundness?: number;
 	autopilot?: boolean | { expand?: number; collapse?: number };
 	button?: BabiButton;
+	promote?: BabiPromoteOptions;
+}
+
+export interface BabiPromoteOptions {
+	to: string;
+	component: Component | VNode;
+	componentProps?: Record<string, unknown>;
+	successVisibleMs?: number;
+	onDismiss?: () => void;
+}
+
+export type BabiPlacement =
+	| { kind: "toast" }
+	| { kind: "promoted"; viewport: string };
+
+export interface BabiPromoteHelpers {
+	id: string;
+	dismiss: () => void;
+	update: (options: Partial<BabiOptions>) => void;
 }
 
 export type BabiPromiseLoadingIndicator = "default" | "pixel-grid";
@@ -78,4 +97,31 @@ export type BabiPixelGridPreset =
 export interface BabiToasterOptions extends Partial<BabiOptions> {
 	promiseLoadingIndicator?: BabiPromiseLoadingIndicator;
 	promiseLoadingIndicatorPreset?: BabiPixelGridPreset;
+}
+
+export interface BabiStreamEmitter<T> {
+	(value: T): void;
+	done: (value?: T) => void;
+	error: (err: unknown) => void;
+}
+
+export type BabiStreamSource<T> =
+	| AsyncIterable<T>
+	| ReadableStream<T>
+	| Ref<T>
+	| ((emit: BabiStreamEmitter<T>) => (() => void) | void);
+
+export interface BabiStreamOptions<T = unknown> {
+	initial?: BabiOptions;
+	frame?: (value: T) => BabiOptions | void;
+	success?: BabiOptions | ((value: T | undefined) => BabiOptions);
+	error?: BabiOptions | ((err: unknown) => BabiOptions);
+	position?: BabiPosition;
+	signal?: AbortSignal;
+}
+
+export interface BabiStreamHandle<T = unknown> {
+	id: string;
+	cancel: () => void;
+	done: Promise<T | undefined>;
 }

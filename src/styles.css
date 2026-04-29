@@ -539,3 +539,46 @@
 			0 0 6px var(--_cell-glow);
 	}
 }
+
+/* ------------------------------- Promotion ------------------------------- */
+
+[data-babi-promoted] {
+	animation: babi-promoted-in 360ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+[data-babi-promoted][data-exiting="true"] {
+	animation: babi-promoted-out 200ms ease-in both;
+}
+
+@keyframes babi-promoted-in {
+	0% {
+		opacity: 0;
+	}
+	45% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+@keyframes babi-promoted-out {
+	to {
+		opacity: 0;
+	}
+}
+
+[data-babi-morph-clone] {
+	pointer-events: none;
+	user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	[data-babi-promoted] {
+		animation: none;
+	}
+
+	[data-babi-morph-clone] {
+		display: none;
+	}
+}

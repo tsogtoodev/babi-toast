@@ -660,6 +660,7 @@ export default defineComponent({
 					ref: buttonRef,
 					type: "button",
 					"data-babi-toast": "",
+					"data-babi-id": props.id,
 					"data-ready": ready.value,
 					"data-expanded": open.value,
 					"data-exiting": props.exiting,
