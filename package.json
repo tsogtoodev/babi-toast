@@ -1,6 +1,6 @@
 {
 	"name": "@tsogtbayar/babi-toast",
-	"version": "0.4.1",
+	"version": "0.4.2",
 	"description": "An opinionated, morphing gooey toast notification library for vue, replacement for sonner.",
 	"repository": {
 		"type": "git",
@@ -34,7 +34,7 @@
 	},
 	"scripts": {
 		"typecheck": "tsc --noEmit",
-		"build": "rm -rf dist && bunchee && cp src/styles.css dist/styles.css",
+		"build": "node scripts/build.mjs",
 		"dev": "bunchee --watch",
 		"demo": "npm run build && node scripts/demo-server.mjs"
 	},

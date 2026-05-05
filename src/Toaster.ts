@@ -311,10 +311,10 @@ export default defineComponent({
 			const px = (v: BabiOffsetValue) =>
 				typeof v === "number" ? `${v}px` : v;
 
-			if (pos.startsWith("top") && o.top) s.top = px(o.top);
-			if (pos.startsWith("bottom") && o.bottom) s.bottom = px(o.bottom);
-			if (pos.endsWith("left") && o.left) s.left = px(o.left);
-			if (pos.endsWith("right") && o.right) s.right = px(o.right);
+			if (pos.startsWith("top") && o.top !== undefined) s.top = px(o.top);
+			if (pos.startsWith("bottom") && o.bottom !== undefined) s.bottom = px(o.bottom);
+			if (pos.endsWith("left") && o.left !== undefined) s.left = px(o.left);
+			if (pos.endsWith("right") && o.right !== undefined) s.right = px(o.right);
 
 			return s as unknown as CSSProperties;
 		}

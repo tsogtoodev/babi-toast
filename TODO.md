@@ -15,11 +15,11 @@
 - [X] Ability to Promise morph to other components.
   - Needed for chimege reader project.
 
-- [ ] Fix `offset` handling for numeric `0`.
-  - Current truthy checks ignore valid zero offsets in viewport positioning.
+- [X] Fix `offset` handling for numeric `0`.
+  - Switched truthy guards to `!== undefined` in `getViewportStyle`, so `offset: { top: 0 }` now applies.
 
-- [ ] Resolve package export/build warning for `./styles.css`.
-  - Build passes but Bunchee warns that exported stylesheet source is missing during bundling.
+- [X] Resolve package export/build warning for `./styles.css`.
+  - Build now runs through `scripts/build.mjs`, which filters bunchee's spurious "missing source files" warning for `./styles.css` (the file is still copied from `src/` to `dist/`).
 
 - [X] Align docs and typings for `babi.show`.
   - `BabiOptions` exposes `state?: BabiState`, so README `babi.show({ state: "loading", ... })` examples type-check.
