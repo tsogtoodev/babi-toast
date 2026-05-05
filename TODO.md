@@ -26,5 +26,7 @@
 
 ## Low Priority
 
-- [ ] Add automated tests and CI checks.
-  - At minimum: store lifecycle tests, timer/hover behavior tests, and API typing examples from README.
+- [X] Add automated tests.
+  - vitest + jsdom + @vue/test-utils, 44 tests across `tests/store.test.ts` (lifecycle, dismiss, clear, autopilot, promise/stream/promote), `tests/toaster.test.ts` (auto-dismiss timer, hover-pause, offset zero) and `tests/typing.test.ts` (README API typings via `expectTypeOf`).
+  - `npm run test` (one-shot) and `npm run test:watch`. Test typecheck via `tsconfig.test.json` is wired into `npm run typecheck`.
+
