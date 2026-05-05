@@ -25,6 +25,7 @@ coverage/
 .vscode/
 
 # Local notes
+.claude/
 AGENTS.md
 PROJECT_ANALYSIS.md
 
