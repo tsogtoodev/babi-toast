@@ -1,11 +1,21 @@
 # Babi Toast
 
+Morphing, gooey toast notifications for Vue 3. Drop-in Sonner-style API with streaming frames, promise helpers, and promote-to-widget transitions.
+
 ## Usage
 
 ### Installation
 
 ```bash
-yarn add @tsogtbayar/babi-toast --registry=https://git.bolor.net/api/v4/projects/844/packages/npm/
+npm install @tsogtoodev/babi-toast
+```
+
+```bash
+yarn add @tsogtoodev/babi-toast
+```
+
+```bash
+pnpm add @tsogtoodev/babi-toast
 ```
 
 ### Local demo
@@ -23,8 +33,8 @@ The demo covers helper states, generic `show`, dismiss, clear, custom component 
 ```vue
 <!-- App.vue -->
 <script setup>
-import { Toaster } from "@tsogtbayar/babi-toast";
-import "@tsogtbayar/babi-toast/styles.css";
+import { Toaster } from "@tsogtoodev/babi-toast";
+import "@tsogtoodev/babi-toast/styles.css";
 </script>
 
 <template>
@@ -46,7 +56,7 @@ Available `promiseLoadingIndicatorPreset` values: `"wave-lr"`, `"wave-rl"`, `"wa
 ### Show toasts
 
 ```ts
-import { babi } from "@tsogtbayar/babi-toast";
+import { babi } from "@tsogtoodev/babi-toast";
 
 babi.success({ fill: "#000000", title: "Saved", description: "Your changes have been saved." });
 babi.error({ fill: "#000000", title: "Error", description: "Something went wrong." });
@@ -64,7 +74,7 @@ babi.action({
 
 ```ts
 import { defineComponent, h } from "vue";
-import { babi } from "@tsogtbayar/babi-toast";
+import { babi } from "@tsogtoodev/babi-toast";
 
 const UploadProgress = defineComponent({
 	props: {
@@ -189,7 +199,7 @@ Each yielded/emitted value can be either a `BabiOptions` patch (merged into the 
 ```vue
 <!-- App.vue -->
 <script setup>
-import { Toaster, BabiPromoteViewport } from "@tsogtbayar/babi-toast";
+import { Toaster, BabiPromoteViewport } from "@tsogtoodev/babi-toast";
 </script>
 
 <template>
@@ -201,7 +211,7 @@ import { Toaster, BabiPromoteViewport } from "@tsogtbayar/babi-toast";
 ```
 
 ```ts
-import { babi } from "@tsogtbayar/babi-toast";
+import { babi } from "@tsogtoodev/babi-toast";
 import AudioPlayer from "./AudioPlayer.vue";
 
 babi.promise(uploadAudio(file), {

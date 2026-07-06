@@ -5,7 +5,7 @@ import {
 	nextTick,
 	ref,
 } from "vue";
-import { BabiPromoteViewport, Toaster, babi } from "@tsogtbayar/babi-toast";
+import { BabiPromoteViewport, Toaster, babi } from "@tsogtoodev/babi-toast";
 
 const POSITIONS = [
 	"top-left",

@@ -1,13 +1,30 @@
 {
-	"name": "@tsogtbayar/babi-toast",
+	"name": "@tsogtoodev/babi-toast",
 	"version": "0.4.2",
-	"description": "An opinionated, morphing gooey toast notification library for vue, replacement for sonner.",
+	"description": "An opinionated, morphing gooey toast notification library for Vue — a Sonner-style replacement with FLIP morphs, streaming, and promote-to-widget.",
+	"author": "Tsogtbayar <tsogtoo.dev@gmail.com>",
+	"license": "MIT",
+	"keywords": [
+		"vue",
+		"vue3",
+		"toast",
+		"notification",
+		"sonner",
+		"gooey",
+		"morph",
+		"promote"
+	],
 	"repository": {
 		"type": "git",
-		"url": "https://git.bolor.net/tsogtbayar/babi-toast.git"
+		"url": "git+https://github.com/tsogtoodev/babi-toast.git"
 	},
+	"bugs": {
+		"url": "https://github.com/tsogtoodev/babi-toast/issues"
+	},
+	"homepage": "https://github.com/tsogtoodev/babi-toast#readme",
 	"publishConfig": {
-		"@tsogtbayar:registry": "https://git.bolor.net/api/v4/projects/844/packages/npm/"
+		"access": "public",
+		"registry": "https://registry.npmjs.org/"
 	},
 	"exports": {
 		".": {
@@ -24,19 +41,22 @@
 		"./styles.css": "./dist/styles.css"
 	},
 	"main": "./dist/index.js",
+	"module": "./dist/index.mjs",
 	"types": "./dist/index.d.ts",
-	"files": [
-		"dist"
+	"sideEffects": [
+		"**/*.css"
 	],
-	"engines": {
-		"node": ">=22",
-		"npm": ">=10"
-	},
+	"files": [
+		"dist",
+		"LICENSE",
+		"README.md"
+	],
 	"scripts": {
 		"typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
 		"build": "node scripts/build.mjs",
 		"dev": "bunchee --watch",
 		"demo": "npm run build && node scripts/demo-server.mjs",
+		"prepublishOnly": "npm run build && npm test",
 		"test": "vitest run",
 		"test:watch": "vitest"
 	},
