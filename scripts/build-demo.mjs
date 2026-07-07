@@ -2,7 +2,7 @@ import { cpSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } f
 import { join } from "node:path";
 
 const root = process.cwd();
-const outDir = join(root, "demo");
+const outDir = join(root, "docs");
 
 rmSync(outDir, { recursive: true, force: true });
 mkdirSync(join(outDir, "dist"), { recursive: true });
