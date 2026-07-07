@@ -17,7 +17,7 @@ const MIME = {
 };
 
 function resolvePath(urlPath) {
-	const pathname = urlPath === "/" ? "/demo/index.html" : urlPath;
+	const pathname = urlPath === "/" ? "/examples/index.html" : urlPath;
 	const safePath = normalize(pathname).replace(/^(\.\.[/\\])+/, "");
 	return join(root, safePath);
 }
